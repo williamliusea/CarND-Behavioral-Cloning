@@ -35,7 +35,7 @@ def crop(image,steering=0.0,tx_lower=-20,tx_upper=20,ty_lower=-2,ty_upper=2,rand
     
     #    print('tx = ',tx,'ty = ',ty)
     random_crop = image[horizon+ty:bonnet+ty,col_start+tx:col_end+tx,:]
-    image = cv2.resize(random_crop,(80,80),cv2.INTER_AREA)
+    image = cv2.resize(random_crop,(320,90),cv2.INTER_AREA)
     # the steering variable needs to be updated to counteract the shift 
     if tx_lower != tx_upper:
         dsteering = -tx/(tx_upper-tx_lower)/3.0
@@ -109,6 +109,7 @@ def generateData(iterations, outdir):
                 filename=outdir+"/IMG/"+str(count)+".jpg"
                 cv2.imwrite(filename,image)
                 csvfile.writerow([filename, filename, filename, steering, 0, 0, 0]) 
+                break
             
 
-generateData(20, "/opt/data")
+generateData(1, "/opt/data")
