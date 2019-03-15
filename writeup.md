@@ -36,9 +36,10 @@ The goals / steps of this project are the following:
 
 My project includes the following files:
 * model.py containing the script to create and train the model
+* random_data.py containing the code to generate randomized data from the sample dataset.  
 * drive.py for driving the car in autonomous mode
 * model.h5 containing a trained convolution neural network 
-* writeup_report.md or writeup_report.pdf summarizing the results
+* writeup.md summarizing the results
 
 #### 2. Submission includes functional code
 Using the Udacity provided simulator and my drive.py file, the car can be driven autonomously around the track by executing 
@@ -69,6 +70,9 @@ The model was trained and validated on different data sets to ensure that the mo
 The model used an adam optimizer, so the learning rate was not tuned manually (model.py line 25).
 
 #### 4. Appropriate training data
+I tried to record my own training data. I find that I am not a good driver. The same model training on my training data is terrible (like it cannot drive straight, drive in circle from the beginning etc). I find that there is a sample training dataset in the symbolic link under the CarND-Behavioral-Cloning-P3/data directory. The result is a much smoother auto driver. 
+I tried 3 different models on the training data set. All of them failed on the section where there is a dirt patch opening on the road at a sharp turn. I 
+
 
 Training data was chosen to keep the vehicle driving on the road. I used a combination of center lane driving, recovering from the left and right sides of the road ... 
 
