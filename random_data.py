@@ -71,7 +71,7 @@ def getImage(line):
     else:
         steering = float(line[3]) - correction
     filename=src_path.split('/')[-1]
-    cur_path='data/IMG/'+filename
+    cur_path='sample_data/IMG/'+filename
     image=cv2.imread(cur_path)
     image,steering = shear(image,steering,shear_range=100)
     image,steering = crop(image,steering,tx_lower=-20,tx_upper=20,ty_lower=-10,ty_upper=10)
@@ -99,7 +99,7 @@ def normalize_steering_lines(bin_edges, keep_rate, lines):
     for i in range(len(lines)):
         h = -1
         for j in range(len(bin_edges)):
-            if (bin_edges[j]>= steerings[i]):
+            if (bin_edges[j]>= float(lines[i,3])):
                 h = j - 1
                 break
         if (h!=-1 and np.random.randint(100000) < keep_rate[h] * 100000):
@@ -119,7 +119,7 @@ def generateData(target, outdir):
 
     count = 0
     lines =[]
-    with open('data/driving_log.csv') as csvfile:
+    with open('sample_data/driving_log.csv') as csvfile:
         reader = csv.reader(csvfile)
         skip_first=False
         for line in reader:
@@ -139,6 +139,26 @@ def generateData(target, outdir):
                 filename=outdir+"/IMG/"+str(count)+".jpg"
                 cv2.imwrite(filename,image)
                 csvfile.writerow([filename, filename, filename, steering, 0, 0, 0])
-                break
-
-generateData(10000, "/opt/data")
+            printProgressBar(count, target)
+                
+# Print iterations progress
+def printProgressBar (iteration, total, prefix = '', suffix = '', decimals = 1, length = 100, fill = 'X'):
+    """
+    Call in a loop to create terminal progress bar
+    @params:
+        iteration   - Required  : current iteration (Int)
+        total       - Required  : total iterations (Int)
+        prefix      - Optional  : prefix string (Str)
+        suffix      - Optional  : suffix string (Str)
+        decimals    - Optional  : positive number of decimals in percent complete (Int)
+        length      - Optional  : character length of bar (Int)
+        fill        - Optional  : bar fill character (Str)
+    """
+    percent = ("{0:." + str(decimals) + "f}").format(100 * (iteration / float(total)))
+    filledLength = int(length * iteration // total)
+    bar = fill * filledLength + '-' * (length - filledLength)
+    print('\r%s |%s| %s/%s %s%% %s' % (prefix, bar, iteration, total, percent, suffix), end = '\r')
+    # Print New Line on Complete
+    if iteration >= total: 
+        print()
+generateData(100000, "/opt/data")

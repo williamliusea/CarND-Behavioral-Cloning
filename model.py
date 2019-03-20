@@ -60,15 +60,15 @@ from keras.layers import Flatten, Dense, Lambda, Cropping2D, Dropout
 from keras.layers.convolutional import Convolution2D
 from keras.layers.pooling import MaxPooling2D
 
-def nvidia():
+def nvidia(input_shape):
     model = Sequential()
-    model.add(Lambda(lambda x: x/127.5 - 1.0, input_shape=(80,80,3)))
-    model.add(Convolution2D(3,5,5,activation='relu'))
+    model.add(Lambda(lambda x: x/127.5 - 1.0, input_shape=input_shape))
+    model.add(Conv2D(3,(5,5),activation='relu'))
     model.add(MaxPooling2D())
-    model.add(Convolution2D(24,5,5,activation='relu'))
-    model.add(Convolution2D(36,5,5,activation='relu'))
-    model.add(Convolution2D(48,3,3,activation='relu'))
-    model.add(Convolution2D(64,3,3,activation='relu'))
+    model.add(Conv2D(24,(5,5),activation='relu'))
+    model.add(Conv2D(36,(5,5,activation='relu'))
+    model.add(Conv2D(48,(3,3),activation='relu'))
+    model.add(Conv2D(64,(3,3),activation='relu'))
     model.add(Dropout(0.5))
     model.add(MaxPooling2D())
     model.add(Flatten())
@@ -79,13 +79,13 @@ def nvidia():
     model.fit(X_train, y_train, validation_split=0.2, shuffle=True, epochs=3)
     model.save('model.nvidia.h5')
 
-def kasper():
+def kasper(input_shape):
     model = Sequential()
-    model.add(Lambda(lambda x: x/127.5 - 1.0, input_shape=(80,80,3)))
-    model.add(Convolution2D(32, 8,8 ,border_mode='same', subsample=(4,4),activation='relu'))
-    model.add(Convolution2D(64, 8,8 ,border_mode='same',subsample=(4,4),activation='relu'))
-    model.add(Convolution2D(128, 4,4,border_mode='same',subsample=(2,2),activation='relu'))
-    model.add(Convolution2D(128, 2,2,border_mode='same',subsample=(1,1),activation='relu'))
+    model.add(Lambda(lambda x: x/127.5 - 1.0, input_shape=input_shape))
+    model.add(Conv2D(32, (8,8) ,border_mode='same', subsample=(4,4),activation='relu'))
+    model.add(Conv2D(64, (8,8) ,border_mode='same',subsample=(4,4),activation='relu'))
+    model.add(Conv2D(128, (4,4),border_mode='same',subsample=(2,2),activation='relu'))
+    model.add(Conv2D(128, (2,2),border_mode='same',subsample=(1,1),activation='relu'))
     model.add(Flatten())
     model.add(Dropout(0.5))
     model.add(Dense(128,activation='relu'))
@@ -96,12 +96,12 @@ def kasper():
     model.fit(X_train, y_train, validation_split=0.2, shuffle=True, epochs=5)
     model.save('model.kasper.h5')
  
-def lenet():
+def lenet(input_shape):
     model = Sequential()
-    model.add(Lambda(lambda x: x/127.5 - 1.0, input_shape=(80,80,3)))
-    model.add(Convolution2D(6,5,5,activation='relu'))
+    model.add(Lambda(lambda x: x/127.5 - 1.0, input_shape=input_shape))
+    model.add(Conv2D(6,(5,5),activation='relu'))
     model.add(MaxPooling2D())
-    model.add(Convolution2D(24,3,3,activation='relu'))
+    model.add(Conv2D(24,(3,3),activation='relu'))
     model.add(MaxPooling2D())
     model.add(Dropout(0.5))
     model.add(Flatten())
@@ -111,10 +111,11 @@ def lenet():
     model.compile(loss='mse', optimizer='adam')
     model.fit(X_train, y_train, validation_split=0.2, shuffle=True, epochs=10)
     model.save('model.lenet.h5')
-   
-lenet()
-nvidia()
-kasper()
+
+shape = (90, 320,3)
+lenet(shape)
+nvidia(shape)
+kasper(shape)
 
 
 # NVIDIA
