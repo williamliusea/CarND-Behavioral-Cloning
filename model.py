@@ -45,12 +45,12 @@ def nvidia(input_shape):
     validation_generator = generator(validation_samples, batch_size=batch_size)
     model = Sequential()
     model.add(Lambda(lambda x: x/127.5 - 1.0, input_shape=input_shape))
-    model.add(Conv2D(3,(5,5),activation='relu'))
+    model.add(Conv2D(3,(5,5),activation=activation))
     model.add(MaxPooling2D())
-    model.add(Conv2D(24,(5,5),activation='relu'))
-    model.add(Conv2D(36,(5,5),activation='relu'))
-    model.add(Conv2D(48,(3,3),activation='relu'))
-    model.add(Conv2D(64,(3,3),activation='relu'))
+    model.add(Conv2D(24,(5,5),activation=activation))
+    model.add(Conv2D(36,(5,5),activation=activation))
+    model.add(Conv2D(48,(3,3),activation=activation))
+    model.add(Conv2D(64,(3,3),activation=activation))
     model.add(Dropout(0.5))
     model.add(MaxPooling2D())
     model.add(Flatten())
@@ -67,18 +67,18 @@ def kasper(input_shape):
     validation_generator = generator(validation_samples, batch_size=batch_size)
     model = Sequential()
     model.add(Lambda(lambda x: x/127.5 - 1.0, input_shape=input_shape))
-    model.add(Conv2D(32, (8,8) ,border_mode='same', strides=(4,4),activation='relu'))
-    model.add(Conv2D(64, (8,8) ,border_mode='same',strides=(4,4),activation='relu'))
-    model.add(Conv2D(128, (4,4),border_mode='same',strides=(2,2),activation='relu'))
-    model.add(Conv2D(128, (2,2),border_mode='same',strides=(1,1),activation='relu'))
+    model.add(Conv2D(32, (8,8) ,padding='same', strides=(4,4),activation=activation))
+    model.add(Conv2D(64, (8,8) ,padding='same',strides=(4,4),activation=activation))
+#     model.add(Dropout(0.5))
+    model.add(Conv2D(128, (4,4),padding='same',strides=(2,2),activation=activation))
+    model.add(Conv2D(128, (2,2),padding='same',strides=(1,1),activation=activation))
     model.add(Flatten())
-    model.add(Dropout(0.5))
-    model.add(Dense(128,activation='relu'))
-    model.add(Dropout(0.5))
+#     model.add(Dropout(0.5))
+    model.add(Dense(128,activation=activation))
     model.add(Dense(128))
     model.add(Dense(1))
     model.compile(loss='mse', optimizer='adam')
-    model.fit_generator(train_generator, steps_per_epoch=math.ceil(len(train_samples)/batch_size), validation_data=validation_generator, validation_steps=math.ceil(len(validation_samples)/batch_size), epochs=3)
+    model.fit_generator(train_generator, steps_per_epoch=math.ceil(len(train_samples)/batch_size), validation_data=validation_generator, validation_steps=math.ceil(len(validation_samples)/batch_size), epochs=10)
     model.save('model.kasper.h5')
  
 def lenet(input_shape):
@@ -88,9 +88,9 @@ def lenet(input_shape):
 
     model = Sequential()
     model.add(Lambda(lambda x: x/127.5 - 1.0, input_shape=input_shape))
-    model.add(Conv2D(6,(5,5),activation='relu'))
+    model.add(Conv2D(6,(5,5),activation=activation))
     model.add(MaxPooling2D())
-    model.add(Conv2D(24,(3,3),activation='relu'))
+    model.add(Conv2D(24,(3,3),activation=activation))
     model.add(MaxPooling2D())
     model.add(Dropout(0.5))
     model.add(Flatten())
@@ -98,11 +98,12 @@ def lenet(input_shape):
     model.add(Dense(84))
     model.add(Dense(1))
     model.compile(loss='mse', optimizer='adam')
-    model.fit_generator(train_generator, steps_per_epoch=math.ceil(len(train_samples)/batch_size), validation_data=validation_generator, validation_steps=math.ceil(len(validation_samples)/batch_size), epochs=5)
+    model.fit_generator(train_generator, steps_per_epoch=math.ceil(len(train_samples)/batch_size), validation_data=validation_generator, validation_steps=math.ceil(len(validation_samples)/batch_size), epochs=10)
     model.save('model.lenet.h5')
 
+activation = 'relu'
 batch_size=320 
-shape = (90, 320,3)
+shape = (64, 64,3)
 lines =[]
 basedir = '/opt/data'
 with open(basedir+'/driving_log.csv') as csvfile:
@@ -122,8 +123,8 @@ print(len(train_samples),len(validation_samples), len(lines))
 
 # X_train = np.array(images)
 # y_train = np.array(measurements)
-lenet(shape)
-nvidia(shape)
+# lenet(shape)
+# nvidia(shape)
 kasper(shape)
 
 

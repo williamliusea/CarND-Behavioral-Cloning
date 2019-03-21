@@ -35,7 +35,8 @@ def crop(image,steering=0.0,tx_lower=-20,tx_upper=20,ty_lower=-2,ty_upper=2,rand
 
     #    print('tx = ',tx,'ty = ',ty)
     random_crop = image[horizon+ty:bonnet+ty,col_start+tx:col_end+tx,:]
-    image = cv2.resize(random_crop,(320,90),cv2.INTER_AREA)
+#     image = cv2.resize(random_crop,(320,90),cv2.INTER_AREA)
+    image = cv2.resize(random_crop,(64,64),cv2.INTER_AREA)
     # the steering variable needs to be updated to counteract the shift
     if tx_lower != tx_upper:
         dsteering = -tx/(tx_upper-tx_lower)/3.0
@@ -83,12 +84,12 @@ def getImage(line):
 def calculate_steering_keep_rate(lines):
     steerings = lines[:,3].astype(np.float)
     hist, bin_edges= np.histogram(steerings,bins=30)
-    median=np.median(hist)
+    threshold=np.average(hist)
     # get the random keep % from the histogram
     keep_rate = []
     for i in range(len(hist)):
-        if (hist[i]>median):
-            keep_rate.append(median/hist[i])
+        if (hist[i]>threshold):
+            keep_rate.append(threshold/hist[i])
         else:
             keep_rate.append(1)
     keep_rate = np.asarray(keep_rate)
