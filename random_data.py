@@ -46,7 +46,7 @@ def crop(image,steering=0.0,tx_lower=-20,tx_upper=20,ty_lower=-2,ty_upper=2,rand
 
     return image,steering
 
-def shear(image,steering,shear_range):
+def affineTransform(image,steering,shear_range):
     rows,cols,ch = image.shape
     dx = np.random.randint(-shear_range,shear_range+1)
     #    print('dx',dx)
@@ -74,7 +74,7 @@ def getImage(line):
     filename=src_path.split('/')[-1]
     cur_path='sample_data/IMG/'+filename
     image=cv2.imread(cur_path)
-    image,steering = shear(image,steering,shear_range=100)
+    image,steering = affineTransform(image,steering,shear_range=100)
     image,steering = crop(image,steering,tx_lower=-20,tx_upper=20,ty_lower=-10,ty_upper=10)
     image,steering = flip(image,steering)
     image = brightness(image)
@@ -141,7 +141,7 @@ def generateData(target, outdir):
                 cv2.imwrite(filename,image)
                 csvfile.writerow([filename, filename, filename, steering, 0, 0, 0])
             printProgressBar(count, target)
-                
+
 # Print iterations progress
 def printProgressBar (iteration, total, prefix = '', suffix = '', decimals = 1, length = 100, fill = 'X'):
     """
@@ -160,6 +160,6 @@ def printProgressBar (iteration, total, prefix = '', suffix = '', decimals = 1, 
     bar = fill * filledLength + '-' * (length - filledLength)
     print('\r%s |%s| %s/%s %s%% %s' % (prefix, bar, iteration, total, percent, suffix), end = '\r')
     # Print New Line on Complete
-    if iteration >= total: 
+    if iteration >= total:
         print()
 generateData(200000, "/home/workspace/data")
