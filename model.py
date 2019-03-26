@@ -4,11 +4,13 @@ import numpy as np
 import numpy.random
 import sklearn
 import math
+import argparse
 
 from keras.models import Sequential
 from keras.layers import Flatten, Dense, Lambda, Cropping2D, Dropout
 from keras.layers.convolutional import Conv2D
 from keras.layers.pooling import MaxPooling2D
+from keras import regularizers
 from sklearn.model_selection import train_test_split
 
 def generator(samples, batch_size=32):
@@ -32,7 +34,7 @@ def generator(samples, batch_size=32):
             X_train = np.array(images)
             y_train = np.array(angles)
             yield sklearn.utils.shuffle(X_train, y_train)
-    
+
 def load_data():
     for line in lines:
         image=cv2.imread(line[0])
@@ -46,19 +48,36 @@ def nvidia(input_shape):
     train_generator = generator(train_samples, batch_size=batch_size)
     validation_generator = generator(validation_samples, batch_size=batch_size)
     model = Sequential()
-    model.add(Lambda(lambda x: x/127.5 - 1.0, input_shape=input_shape))
-    model.add(Conv2D(3,(3,3), strides=(2,2), padding='same', activation=activation))
-#     model.add(MaxPooling2D())
-    model.add(Conv2D(24,(5,5), strides=(2,2), padding='same',activation=activation))
-    model.add(Conv2D(36,(5,5), strides=(2,2), padding='same',activation=activation))
-    model.add(Conv2D(48,(3,3), padding='same',activation=activation))
-    model.add(Conv2D(64,(3,3), padding='same',activation=activation))
-#     model.add(Dropout(0.5))
+    # compile and train the model using the generator function
+    model.add(Lambda(lambda x: x/127.5 - 1.0,input_shape=input_shape))
+
+    # Add three 5x5 convolution layers (output depth 24, 36, and 48), each with 2x2 stride
+    model.add(Conv2D(24, (5, 5), strides=(2, 2), padding='valid', kernel_regularizer=regularizers.l2(0.001), activation='elu'))
+    model.add(Conv2D(36, (5, 5), strides=(2, 2), padding='valid', kernel_regularizer=regularizers.l2(0.001), activation='elu'))
+    model.add(Conv2D(48, (5, 5), strides=(2, 2), padding='valid', kernel_regularizer=regularizers.l2(0.001), activation='elu'))
+
+    #model.add(Dropout(0.50))
+
+    # Add two 3x3 convolution layers (output depth 64, and 64)
+    model.add(Conv2D(64, (3, 3), padding='valid', kernel_regularizer=regularizers.l2(0.001), activation='elu'))
+    model.add(Conv2D(64, (3, 3), padding='valid', kernel_regularizer=regularizers.l2(0.001), activation='elu'))
+
+    # Add a flatten layer
     model.add(Flatten())
-    model.add(Dense(300))
-    model.add(Dense(30))
-    model.add(Dense(17))
+
+    # Add three fully connected layers (depth 100, 50, 10), tanh activation (and dropouts)
+    model.add(Dense(100, kernel_regularizer=regularizers.l2(0.001), activation='elu'))
+    #model.add(Dropout(0.50))
+    model.add(Dense(50, kernel_regularizer=regularizers.l2(0.001), activation='elu'))
+    #model.add(Dropout(0.50))
+    model.add(Dense(10, kernel_regularizer=regularizers.l2(0.001), activation='elu'))
+    #model.add(Dropout(0.50))
+
+    # Add a fully connected output layer
     model.add(Dense(1))
+    model.summary()
+    if summaryonly:
+        return
     model.compile(loss='mse', optimizer='adam')
     model.fit_generator(train_generator, steps_per_epoch=math.ceil(len(train_samples)/batch_size), validation_data=validation_generator, validation_steps=math.ceil(len(validation_samples)/batch_size), epochs=10)
     model.save('model.nvidia.h5')
@@ -81,10 +100,12 @@ def kasper(input_shape):
     model.add(Dense(128))
     model.add(Dense(1))
     model.summary()
+    if summaryonly:
+        return
     model.compile(loss='mse', optimizer='adam')
     model.fit_generator(train_generator, steps_per_epoch=math.ceil(len(train_samples)/batch_size), validation_data=validation_generator, validation_steps=math.ceil(len(validation_samples)/batch_size), epochs=5)
     model.save('model.kasper.h5')
-    
+
 def kasper2(input_shape):
     print("Kasper Sakmann model modified")
     # compile and train the model using the generator function
@@ -103,10 +124,12 @@ def kasper2(input_shape):
     model.add(Dense(128))
     model.add(Dense(1))
     model.summary()
+    if summaryonly:
+        return
     model.compile(loss='mse', optimizer='adam')
     model.fit_generator(train_generator, steps_per_epoch=math.ceil(len(train_samples)/batch_size), validation_data=validation_generator, validation_steps=math.ceil(len(validation_samples)/batch_size), epochs=5)
     model.save('model.kasper2.h5')
- 
+
 def lenet(input_shape):
     print("Lenet model")
     # compile and train the model using the generator function
@@ -124,15 +147,27 @@ def lenet(input_shape):
     model.add(Dense(120))
     model.add(Dense(84))
     model.add(Dense(1))
+    model.summary()
+    if summaryonly:
+        return
     model.compile(loss='mse', optimizer='adam')
     model.fit_generator(train_generator, steps_per_epoch=math.ceil(len(train_samples)/batch_size), validation_data=validation_generator, validation_steps=math.ceil(len(validation_samples)/batch_size), epochs=10)
     model.save('model.lenet.h5')
 
+parser = argparse.ArgumentParser(description='Visulization')
+parser.add_argument(
+    'input_path',
+    type=str,
+    help='Path data.'
+)
+args = parser.parse_args()
+
 activation = 'elu'
-batch_size=320 
+batch_size=320
 shape = (64, 64,3)
 lines =[]
-basedir = '/home/workspace/data'
+summaryonly=True
+basedir = args.input_path
 with open(basedir+'/driving_log.csv') as csvfile:
     reader = csv.reader(csvfile)
     skip_first=False
@@ -149,9 +184,9 @@ train_samples, validation_samples = train_test_split(lines, test_size=0.2)
 
 # X_train = np.array(images)
 # y_train = np.array(measurements)
-# lenet(shape)
-#nvidia(shape)
-# kasper(shape)
+lenet(shape)
+nvidia(shape)
+kasper(shape)
 kasper2(shape)
 
 
@@ -177,7 +212,7 @@ kasper2(shape)
 # Epoch 10/10
 # 254/254 [==============================] - 22s - loss: 0.0154 - val_loss: 0.0227
 
-# kaspar 
+# kaspar
 # 38572/38572 [==============================] - 43s - loss: 0.0121 - val_loss: 0.0090
 # Epoch 2/3
 # 38572/38572 [==============================] - 37s - loss: 0.0102 - val_loss: 0.0084
@@ -207,5 +242,3 @@ kasper2(shape)
 # 254/254 [==============================] - 16s - loss: 0.0139 - val_loss: 0.0239
 
 exit()
-
-
