@@ -23,9 +23,10 @@ def generator(samples, batch_size=32):
             for batch_sample in batch_samples:
                 name = batch_sample[0]
                 center_image = cv2.imread(name)
-                center_angle = float(batch_sample[3])
-                images.append(center_image)
-                angles.append(center_angle)
+                if (center_image is not None):
+                    center_angle = float(batch_sample[3])
+                    images.append(center_image)
+                    angles.append(center_angle)
 
             # trim image to only see section with road
             X_train = np.array(images)
@@ -67,24 +68,30 @@ def kasper(input_shape):
     # compile and train the model using the generator function
     train_generator = generator(train_samples, batch_size=batch_size)
     validation_generator = generator(validation_samples, batch_size=batch_size)
-    model = Sequential()
-    model.add(Lambda(lambda x: x/127.5 - 1.0, input_shape=input_shape))
-    model.add(Conv2D(32, (8,8) ,padding='same', strides=(4,4),activation=activation))
-    model.add(Conv2D(64, (8,8) ,padding='same',strides=(4,4),activation=activation))
-#     model.add(Dropout(0.5))
-    model.add(Conv2D(128, (4,4),padding='same',strides=(2,2),activation=activation))
-    model.add(Conv2D(128, (2,2),padding='same',strides=(1,1),activation=activation))
+l    model = Sequential()
+    model.add(Lambda(lambda x: x/127.5 - 1.0,input_shape=(64,64,3)))
+    model.add(Convolution2D(32, 8,8 ,border_mode='same', subsample=(4,4)))
+    model.add(Activation('relu'))
+    model.add(Convolution2D(64, 8,8 ,border_mode='same',subsample=(4,4)))
+    model.add(Activation('relu',name='relu2'))
+    model.add(Convolution2D(128, 4,4,border_mode='same',subsample=(2,2)))
+    model.add(Activation('relu'))
+    model.add(Convolution2D(128, 2,2,border_mode='same',subsample=(1,1)))
+    model.add(Activation('relu'))
     model.add(Flatten())
-#     model.add(Dropout(0.5))
-    model.add(Dense(128,activation=activation))
+    model.add(Dropout(0.5))
+    model.add(Dense(128))
+    model.add(Activation('relu'))
+    model.add(Dropout(0.5))
     model.add(Dense(128))
     model.add(Dense(1))
+    model.summary()
     model.compile(loss='mse', optimizer='adam')
     model.fit_generator(train_generator, steps_per_epoch=math.ceil(len(train_samples)/batch_size), validation_data=validation_generator, validation_steps=math.ceil(len(validation_samples)/batch_size), epochs=10)
     model.save('model.kasper.h5')
 
 def kasper2(input_shape):
-    print("Kasper Sakmann model")
+    print("Kasper Sakmann model modified")
     # compile and train the model using the generator function
     train_generator = generator(train_samples, batch_size=batch_size)
     validation_generator = generator(validation_samples, batch_size=batch_size)
@@ -93,16 +100,17 @@ def kasper2(input_shape):
     model.add(Conv2D(32, (8,8) ,padding='same', strides=(4,4),activation=activation))
     model.add(Conv2D(64, (8,8) ,padding='same',strides=(4,4),activation=activation))
 #     model.add(Dropout(0.5))
-    model.add(Conv2D(128, (4,4),padding='same',strides=(2,2),activation=activation))
-    model.add(Conv2D(128, (2,2),padding='same',strides=(1,1),activation=activation))
+    model.add(Conv2D(128, (4,4),padding='same',strides=(4,4),activation=activation))
+    # model.add(Conv2D(128, (2,2),padding='same',strides=(1,1),activation=activation))
     model.add(Flatten())
-#     model.add(Dropout(0.5))
+    model.add(Dropout(0.5))
     model.add(Dense(128,activation=activation))
-#     model.add(Dense(128))
+    model.add(Dense(128))
     model.add(Dense(1))
+    model.summary()
     model.compile(loss='mse', optimizer='adam')
     model.fit_generator(train_generator, steps_per_epoch=math.ceil(len(train_samples)/batch_size), validation_data=validation_generator, validation_steps=math.ceil(len(validation_samples)/batch_size), epochs=10)
-    model.save('model.kasper.h5')
+    model.save('model.kasper2.h5')
 
 def lenet(input_shape):
     print("Lenet model")
@@ -125,11 +133,11 @@ def lenet(input_shape):
     model.fit_generator(train_generator, steps_per_epoch=math.ceil(len(train_samples)/batch_size), validation_data=validation_generator, validation_steps=math.ceil(len(validation_samples)/batch_size), epochs=10)
     model.save('model.lenet.h5')
 
-activation = 'relu'
+activation = 'elu'
 batch_size=320
 shape = (64, 64,3)
 lines =[]
-basedir = './data'
+basedir = '/home/workspace/data'
 with open(basedir+'/driving_log.csv') as csvfile:
     reader = csv.reader(csvfile)
     skip_first=False
@@ -147,8 +155,9 @@ train_samples, validation_samples = train_test_split(lines, test_size=0.2)
 # X_train = np.array(images)
 # y_train = np.array(measurements)
 # lenet(shape)
-nvidia(shape)
+#nvidia(shape)
 # kasper(shape)
+kasper2(shape)
 
 
 # NVIDIA
