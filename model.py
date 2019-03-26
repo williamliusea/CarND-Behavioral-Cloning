@@ -32,7 +32,7 @@ def generator(samples, batch_size=32):
             X_train = np.array(images)
             y_train = np.array(angles)
             yield sklearn.utils.shuffle(X_train, y_train)
-
+    
 def load_data():
     for line in lines:
         image=cv2.imread(line[0])
@@ -68,28 +68,23 @@ def kasper(input_shape):
     # compile and train the model using the generator function
     train_generator = generator(train_samples, batch_size=batch_size)
     validation_generator = generator(validation_samples, batch_size=batch_size)
-l    model = Sequential()
+    model = Sequential()
     model.add(Lambda(lambda x: x/127.5 - 1.0,input_shape=(64,64,3)))
-    model.add(Convolution2D(32, 8,8 ,border_mode='same', subsample=(4,4)))
-    model.add(Activation('relu'))
-    model.add(Convolution2D(64, 8,8 ,border_mode='same',subsample=(4,4)))
-    model.add(Activation('relu',name='relu2'))
-    model.add(Convolution2D(128, 4,4,border_mode='same',subsample=(2,2)))
-    model.add(Activation('relu'))
-    model.add(Convolution2D(128, 2,2,border_mode='same',subsample=(1,1)))
-    model.add(Activation('relu'))
+    model.add(Conv2D(32, (8,8) ,padding='same', strides=(4,4), activation='relu'))
+    model.add(Conv2D(64, (8,8) ,padding='same',strides=(4,4), activation='relu'))
+    model.add(Conv2D(128, (4,4),padding='same',strides=(2,2), activation='relu'))
+    model.add(Conv2D(128, (2,2),padding='same',strides=(1,1), activation='relu'))
     model.add(Flatten())
     model.add(Dropout(0.5))
-    model.add(Dense(128))
-    model.add(Activation('relu'))
+    model.add(Dense(128, activation='relu'))
     model.add(Dropout(0.5))
     model.add(Dense(128))
     model.add(Dense(1))
     model.summary()
     model.compile(loss='mse', optimizer='adam')
-    model.fit_generator(train_generator, steps_per_epoch=math.ceil(len(train_samples)/batch_size), validation_data=validation_generator, validation_steps=math.ceil(len(validation_samples)/batch_size), epochs=10)
+    model.fit_generator(train_generator, steps_per_epoch=math.ceil(len(train_samples)/batch_size), validation_data=validation_generator, validation_steps=math.ceil(len(validation_samples)/batch_size), epochs=5)
     model.save('model.kasper.h5')
-
+    
 def kasper2(input_shape):
     print("Kasper Sakmann model modified")
     # compile and train the model using the generator function
@@ -103,15 +98,15 @@ def kasper2(input_shape):
     model.add(Conv2D(128, (4,4),padding='same',strides=(4,4),activation=activation))
     # model.add(Conv2D(128, (2,2),padding='same',strides=(1,1),activation=activation))
     model.add(Flatten())
-    model.add(Dropout(0.5))
+#    model.add(Dropout(0.5))
     model.add(Dense(128,activation=activation))
     model.add(Dense(128))
     model.add(Dense(1))
     model.summary()
     model.compile(loss='mse', optimizer='adam')
-    model.fit_generator(train_generator, steps_per_epoch=math.ceil(len(train_samples)/batch_size), validation_data=validation_generator, validation_steps=math.ceil(len(validation_samples)/batch_size), epochs=10)
+    model.fit_generator(train_generator, steps_per_epoch=math.ceil(len(train_samples)/batch_size), validation_data=validation_generator, validation_steps=math.ceil(len(validation_samples)/batch_size), epochs=5)
     model.save('model.kasper2.h5')
-
+ 
 def lenet(input_shape):
     print("Lenet model")
     # compile and train the model using the generator function
@@ -134,7 +129,7 @@ def lenet(input_shape):
     model.save('model.lenet.h5')
 
 activation = 'elu'
-batch_size=320
+batch_size=320 
 shape = (64, 64,3)
 lines =[]
 basedir = '/home/workspace/data'
@@ -182,7 +177,7 @@ kasper2(shape)
 # Epoch 10/10
 # 254/254 [==============================] - 22s - loss: 0.0154 - val_loss: 0.0227
 
-# kaspar
+# kaspar 
 # 38572/38572 [==============================] - 43s - loss: 0.0121 - val_loss: 0.0090
 # Epoch 2/3
 # 38572/38572 [==============================] - 37s - loss: 0.0102 - val_loss: 0.0084
@@ -212,3 +207,5 @@ kasper2(shape)
 # 254/254 [==============================] - 16s - loss: 0.0139 - val_loss: 0.0239
 
 exit()
+
+
