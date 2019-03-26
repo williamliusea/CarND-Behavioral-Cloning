@@ -31,7 +31,7 @@ def generator(samples, batch_size=32):
             X_train = np.array(images)
             y_train = np.array(angles)
             yield sklearn.utils.shuffle(X_train, y_train)
-    
+
 def load_data():
     for line in lines:
         image=cv2.imread(line[0])
@@ -82,6 +82,7 @@ def kasper(input_shape):
     model.compile(loss='mse', optimizer='adam')
     model.fit_generator(train_generator, steps_per_epoch=math.ceil(len(train_samples)/batch_size), validation_data=validation_generator, validation_steps=math.ceil(len(validation_samples)/batch_size), epochs=10)
     model.save('model.kasper.h5')
+
 def kasper2(input_shape):
     print("Kasper Sakmann model")
     # compile and train the model using the generator function
@@ -102,7 +103,7 @@ def kasper2(input_shape):
     model.compile(loss='mse', optimizer='adam')
     model.fit_generator(train_generator, steps_per_epoch=math.ceil(len(train_samples)/batch_size), validation_data=validation_generator, validation_steps=math.ceil(len(validation_samples)/batch_size), epochs=10)
     model.save('model.kasper.h5')
- 
+
 def lenet(input_shape):
     print("Lenet model")
     # compile and train the model using the generator function
@@ -125,10 +126,10 @@ def lenet(input_shape):
     model.save('model.lenet.h5')
 
 activation = 'relu'
-batch_size=320 
+batch_size=320
 shape = (64, 64,3)
 lines =[]
-basedir = '/opt/data'
+basedir = './data'
 with open(basedir+'/driving_log.csv') as csvfile:
     reader = csv.reader(csvfile)
     skip_first=False
@@ -172,7 +173,7 @@ nvidia(shape)
 # Epoch 10/10
 # 254/254 [==============================] - 22s - loss: 0.0154 - val_loss: 0.0227
 
-# kaspar 
+# kaspar
 # 38572/38572 [==============================] - 43s - loss: 0.0121 - val_loss: 0.0090
 # Epoch 2/3
 # 38572/38572 [==============================] - 37s - loss: 0.0102 - val_loss: 0.0084
@@ -202,5 +203,3 @@ nvidia(shape)
 # 254/254 [==============================] - 16s - loss: 0.0139 - val_loss: 0.0239
 
 exit()
-
-

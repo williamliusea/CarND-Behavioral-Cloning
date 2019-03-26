@@ -82,7 +82,16 @@ For details about how I created the training data, see the next section.
 
 ### 1. Solution Design Approach
 
-My first step was to use a convolution neural network model similar to the one described in the course. I choose it because it is fast. I implemented the NVIDIA model in parallel and find it takes 10x time to train the model. Therefore, for faster figure out the correct parameter like the correction for left and right camera, I need to use one that is better.
+My first step was to use a convolution neural network model similar to the one described in the course. I choose it because it is fast. When I tested the code, the car immediately drove off the road.
+
+I think it is a better idea to learn from previous successful models.
+I googled and found Kasper Sakmann and Jeremy Shannon wrote about his model before.
+Jeremy Shannon uses the Nvidia model. Comparing the two models
+
+ 
+
+
+
 First version:
 6,5,5 conv2d
 maxpooling
@@ -118,11 +127,12 @@ At the end of the process, the vehicle is able to drive autonomously around the 
 
 ### 2. Final Model Architecture
 
-The final model architecture (model.py lines 18-24) consisted of a convolution neural network with the following layers and layer sizes ...
+The final model architecture (model.py method kasper()) consisted of a convolution neural network with the following layers and layer sizes
+
 
 Here is a visualization of the architecture (note: visualizing the architecture is optional according to the project rubric)
 
-![alt text][image1]
+
 
 ### 3. Creation of the Training Set & Training Process
 
