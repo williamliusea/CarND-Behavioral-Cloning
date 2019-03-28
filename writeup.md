@@ -1,31 +1,5 @@
 # **Behavioral Cloning**
 
-## Writeup Template
-
-### You can use this file as a template for your writeup if you want to submit it as a markdown file, but feel free to use some other method and submit a pdf if you prefer.
-
----
-
-**Behavioral Cloning Project**
-
-The goals / steps of this project are the following:
-* Use the simulator to collect data of good driving behavior
-* Build, a convolution neural network in Keras that predicts steering angles from images
-* Train and validate the model with a training and validation set
-* Test that the model successfully drives around track one without leaving the road
-* Summarize the results with a written report
-
-
-[//]: # (Image References)
-
-[image1]: ./examples/placeholder.png "Model Visualization"
-[image2]: ./examples/placeholder.png "Grayscaling"
-[image3]: ./examples/placeholder_small.png "Recovery Image"
-[image4]: ./examples/placeholder_small.png "Recovery Image"
-[image5]: ./examples/placeholder_small.png "Recovery Image"
-[image6]: ./examples/placeholder_small.png "Normal Image"
-[image7]: ./examples/placeholder_small.png "Flipped Image"
-
 ## Rubric Points
 ### Here I will consider the [rubric points](https://review.udacity.com/#!/rubrics/432/view) individually and describe how I addressed each point in my implementation.  
 
@@ -38,18 +12,18 @@ My project includes the following files:
 * model.py containing the script to create and train the model
 * random_data.py containing the code to generate randomized data from the sample dataset.  
 * drive.py for driving the car in autonomous mode
-* model.h5 containing a trained convolution neural network
+* model.kasper2.h5 containing a trained convolution neural network
 * writeup.md summarizing the results
 
 #### 2. Submission includes functional code
 Using the Udacity provided simulator and my drive.py file, the car can be driven autonomously around the track by executing
 ```sh
-python drive.py model.h5
+python drive.py model.kasper2.h5
 ```
 
 #### 3. Submission code is usable and readable
 
-The model.py file contains the code for training and saving the convolution neural network. The file shows the pipeline I used for training and validating the model, and it contains comments to explain how the code works.
+The model.py file contains the code for training and saving the convolution neural network. The file shows the pipeline I used for training and validating the model, and it contains comments to explain how the code works. The final model is generated using `kasper2()`
 
 ### Model Architecture and Training Strategy
 
@@ -61,9 +35,7 @@ The model includes RELU layers to introduce nonlinearity (code line 20), and the
 
 #### 2. Attempts to reduce overfitting in the model
 
-The model contains dropout layers in order to reduce overfitting (model.py lines 21).
-
-The model was trained and validated on different data sets to ensure that the model was not overfitting (code line 10-16). The model was tested by running it through the simulator and ensuring that the vehicle could stay on the track.
+I tried to 
 
 #### 3. Model parameter tuning
 
@@ -86,52 +58,148 @@ My first step was to use a convolution neural network model similar to the one d
 
 I think it is a better idea to learn from previous successful models.
 I googled and found Kasper Sakmann and Jeremy Shannon wrote about his model before.
-Jeremy Shannon uses the Nvidia model. Comparing the two models
+Jeremy Shannon uses the Nvidia model. First I verified both of the models can drive the car successful in the first track. With this knowledge, my next step is to compare them and see if I can improve the model.
+A better model is the one that trains faster and smaller.
+Looking at the model print out.
 
- 
+```
+Nvidia
+_________________________________________________________________
+Layer (type)                 Output Shape              Param #   
+=================================================================
+lambda_2 (Lambda)            (None, 64, 64, 3)         0         
+_________________________________________________________________
+conv2d_3 (Conv2D)            (None, 30, 30, 24)        1824      
+_________________________________________________________________
+conv2d_4 (Conv2D)            (None, 13, 13, 36)        21636     
+_________________________________________________________________
+conv2d_5 (Conv2D)            (None, 5, 5, 48)          43248     
+_________________________________________________________________
+conv2d_6 (Conv2D)            (None, 3, 3, 64)          27712     
+_________________________________________________________________
+conv2d_7 (Conv2D)            (None, 1, 1, 64)          36928     
+_________________________________________________________________
+flatten_2 (Flatten)          (None, 64)                0         
+_________________________________________________________________
+dense_4 (Dense)              (None, 100)               6500      
+_________________________________________________________________
+dense_5 (Dense)              (None, 50)                5050      
+_________________________________________________________________
+dense_6 (Dense)              (None, 10)                510       
+_________________________________________________________________
+dense_7 (Dense)              (None, 1)                 11        
+=================================================================
+Total params: 143,419
+Trainable params: 143,419
+Non-trainable params: 0
+```
+```
+Kasper Sakmann model
+_________________________________________________________________
+Layer (type)                 Output Shape              Param #   
+=================================================================
+lambda_3 (Lambda)            (None, 64, 64, 3)         0         
+_________________________________________________________________
+conv2d_8 (Conv2D)            (None, 16, 16, 32)        6176      
+_________________________________________________________________
+conv2d_9 (Conv2D)            (None, 4, 4, 64)          131136    
+_________________________________________________________________
+conv2d_10 (Conv2D)           (None, 2, 2, 128)         131200    
+_________________________________________________________________
+conv2d_11 (Conv2D)           (None, 2, 2, 128)         65664     
+_________________________________________________________________
+flatten_3 (Flatten)          (None, 512)               0         
+_________________________________________________________________
+dropout_2 (Dropout)          (None, 512)               0         
+_________________________________________________________________
+dense_8 (Dense)              (None, 128)               65664     
+_________________________________________________________________
+dropout_3 (Dropout)          (None, 128)               0         
+_________________________________________________________________
+dense_9 (Dense)              (None, 128)               16512     
+_________________________________________________________________
+dense_10 (Dense)             (None, 1)                 129       
+=================================================================
+Total params: 416,481
+Trainable params: 416,481
+Non-trainable params: 0
+```
+
+It is clear that the Nvidia model is smaller. But it is deeper.
+In my previous project, I find that deeper model produces better result. Therefore, I think Nvidia model is better.
+
+After training the model, I tested both of the models on the first track. None of them can drive through one lap.
+
+Looking at the Nvidia model, I find the model is supposed to work on 66X200 size of image. My input is scaled to 64x64. Therefore, the model needs some modification for it to work. Therefore, I decided to make Kasper model work first.
+
+Looking at the Kasper model, I think it shall work because it is define to handle 64x64 model. I tried to modify the size fo the filter, the strides size and the Dense layers. But non of them has any impact. Finally, without changing the hyperparameters, I tried to remove the two drop out layers. And the car can finish the lap. Looks like the drop out cuts important connections thus making the model work. This makes me think that random drop out may not be a good idea for small models.
+
+The next step for me is to try to reduce the Kasper model to make it simpler. I tried to remove the last layer of conv2d. It did not work at the beginning, after examing the model summary, I think i need to make the out of the third conv2d layer deep but small. Therefore, I increase the strides of the third conv2d layer to (4,4). Here is the summary of the model and it can drive the car through a full lap.
+
+```
+Kasper Sakmann model modified
+_________________________________________________________________
+Layer (type)                 Output Shape              Param #   
+=================================================================
+lambda_4 (Lambda)            (None, 64, 64, 3)         0         
+_________________________________________________________________
+conv2d_12 (Conv2D)           (None, 16, 16, 32)        6176      
+_________________________________________________________________
+conv2d_13 (Conv2D)           (None, 4, 4, 64)          131136    
+_________________________________________________________________
+conv2d_14 (Conv2D)           (None, 1, 1, 128)         131200    
+_________________________________________________________________
+flatten_4 (Flatten)          (None, 128)               0         
+_________________________________________________________________
+dense_11 (Dense)             (None, 128)               16512     
+_________________________________________________________________
+dense_12 (Dense)             (None, 128)               16512     
+_________________________________________________________________
+dense_13 (Dense)             (None, 1)                 129       
+=================================================================
+Total params: 301,665
+Trainable params: 301,665
+Non-trainable params: 0
+```
+With this change, cut 1/4 of the parameters and the model is only **36MB**
+
+With this finding, I tried to make the Nvidia model similar structure but deeper. Here is the summary of the model.
 
 
 
-First version:
-6,5,5 conv2d
-maxpooling
-6,5,5 conv2d
-maxpooling
-dense 120, 84, 1
-epoch 5
-
-Second version
-6,5,5 conv2d
-dropout 0.5
-maxpooling
-24,5,5 conv2d
-maxpooling
-dense 120, 84, 1
-epoch 3
-result is immediately driving out of the road.
-
-Using the NVIDIA version
-result is immediately driving out of the road.
-
-
-
-In order to gauge how well the model was working, I split my image and steering angle data into a training and validation set. I found that my first model had a low mean squared error on the training set but a high mean squared error on the validation set. This implied that the model was overfitting.
-
-To combat the overfitting, I modified the model so that ...
-
-Then I ...
-
-The final step was to run the simulator to see how well the car was driving around track one. There were a few spots where the vehicle fell off the track... to improve the driving behavior in these cases, I ....
-
-At the end of the process, the vehicle is able to drive autonomously around the track without leaving the road.
 
 ### 2. Final Model Architecture
 
-The final model architecture (model.py method kasper()) consisted of a convolution neural network with the following layers and layer sizes
+The final model architecture (model.py method kasper2()) consisted of a convolution neural network with the following layers and layer sizes
 
 
 Here is a visualization of the architecture (note: visualizing the architecture is optional according to the project rubric)
 
+```
+Kasper Sakmann model modified
+_________________________________________________________________
+Layer (type)                 Output Shape              Param #   
+=================================================================
+lambda_4 (Lambda)            (None, 64, 64, 3)         0         
+_________________________________________________________________
+conv2d_12 (Conv2D)           (None, 16, 16, 32)        6176      
+_________________________________________________________________
+conv2d_13 (Conv2D)           (None, 4, 4, 64)          131136    
+_________________________________________________________________
+conv2d_14 (Conv2D)           (None, 1, 1, 128)         131200    
+_________________________________________________________________
+flatten_4 (Flatten)          (None, 128)               0         
+_________________________________________________________________
+dense_11 (Dense)             (None, 128)               16512     
+_________________________________________________________________
+dense_12 (Dense)             (None, 128)               16512     
+_________________________________________________________________
+dense_13 (Dense)             (None, 1)                 129       
+=================================================================
+Total params: 301,665
+Trainable params: 301,665
+Non-trainable params: 0
+```
 
 
 ### 3. Creation of the Training Set & Training Process

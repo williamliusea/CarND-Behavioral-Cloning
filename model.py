@@ -52,9 +52,9 @@ def nvidia(input_shape):
     model.add(Lambda(lambda x: x/127.5 - 1.0,input_shape=input_shape))
 
     # Add three 5x5 convolution layers (output depth 24, 36, and 48), each with 2x2 stride
-    model.add(Conv2D(24, (5, 5), strides=(2, 2), padding='valid', kernel_regularizer=regularizers.l2(0.001), activation='elu'))
-    model.add(Conv2D(36, (5, 5), strides=(2, 2), padding='valid', kernel_regularizer=regularizers.l2(0.001), activation='elu'))
-    model.add(Conv2D(48, (5, 5), strides=(2, 2), padding='valid', kernel_regularizer=regularizers.l2(0.001), activation='elu'))
+    model.add(Conv2D(24, (16, 16), strides=(2, 2), padding='same', kernel_regularizer=regularizers.l2(0.001), activation='elu'))
+    model.add(Conv2D(36, (8, 8), strides=(2, 2), padding='valid', kernel_regularizer=regularizers.l2(0.001), activation='elu'))
+    model.add(Conv2D(48, (4, 4), strides=(1, 1), padding='valid', kernel_regularizer=regularizers.l2(0.001), activation='elu'))
 
     #model.add(Dropout(0.50))
 
@@ -166,7 +166,7 @@ activation = 'elu'
 batch_size=320
 shape = (64, 64,3)
 lines =[]
-summaryonly=True
+summaryonly=False
 basedir = args.input_path
 with open(basedir+'/driving_log.csv') as csvfile:
     reader = csv.reader(csvfile)
@@ -186,6 +186,7 @@ train_samples, validation_samples = train_test_split(lines, test_size=0.2)
 # y_train = np.array(measurements)
 lenet(shape)
 nvidia(shape)
+nvidia2(shape)
 kasper(shape)
 kasper2(shape)
 
