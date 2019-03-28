@@ -82,6 +82,46 @@ def nvidia(input_shape):
     model.fit_generator(train_generator, steps_per_epoch=math.ceil(len(train_samples)/batch_size), validation_data=validation_generator, validation_steps=math.ceil(len(validation_samples)/batch_size), epochs=10)
     model.save('model.nvidia.h5')
 
+def nvidia2(input_shape):
+    print("Nvidia modified")
+    # compile and train the model using the generator function
+    train_generator = generator(train_samples, batch_size=batch_size)
+    validation_generator = generator(validation_samples, batch_size=batch_size)
+    model = Sequential()
+    # compile and train the model using the generator function
+    model.add(Lambda(lambda x: x/127.5 - 1.0,input_shape=input_shape))
+
+    # Add three 5x5 convolution layers (output depth 24, 36, and 48), each with 2x2 stride
+    model.add(Conv2D(24, (10, 10), strides=(2, 2), padding='same', kernel_regularizer=regularizers.l2(0.001), activation='elu'))
+    model.add(Conv2D(36, (5, 5), strides=(2, 2), padding='same', kernel_regularizer=regularizers.l2(0.001), activation='elu'))
+    model.add(Conv2D(48, (5, 5), strides=(2, 2), padding='same', kernel_regularizer=regularizers.l2(0.001), activation='elu'))
+
+    #model.add(Dropout(0.50))
+
+    # Add two 3x3 convolution layers (output depth 64, and 64)
+    model.add(Conv2D(64, (3, 3), strides=(2, 2), padding='same', kernel_regularizer=regularizers.l2(0.001), activation='elu'))
+    model.add(Conv2D(128, (3, 3), padding='same', kernel_regularizer=regularizers.l2(0.001), activation='elu'))
+
+    # Add a flatten layer
+    model.add(Flatten())
+
+    # Add three fully connected layers (depth 100, 50, 10), tanh activation (and dropouts)
+    model.add(Dense(100, kernel_regularizer=regularizers.l2(0.001), activation='elu'))
+    #model.add(Dropout(0.50))
+    model.add(Dense(50, kernel_regularizer=regularizers.l2(0.001), activation='elu'))
+    #model.add(Dropout(0.50))
+    model.add(Dense(10, kernel_regularizer=regularizers.l2(0.001), activation='elu'))
+    #model.add(Dropout(0.50))
+
+    # Add a fully connected output layer
+    model.add(Dense(1))
+    model.summary()
+    if summaryonly:
+        return
+    model.compile(loss='mse', optimizer='adam')
+    model.fit_generator(train_generator, steps_per_epoch=math.ceil(len(train_samples)/batch_size), validation_data=validation_generator, validation_steps=math.ceil(len(validation_samples)/batch_size), epochs=10)
+    model.save('model.nvidia2.h5')
+
 def kasper(input_shape):
     print("Kasper Sakmann model")
     # compile and train the model using the generator function
@@ -166,7 +206,7 @@ activation = 'elu'
 batch_size=320
 shape = (64, 64,3)
 lines =[]
-summaryonly=True
+summaryonly=False
 basedir = args.input_path
 with open(basedir+'/driving_log.csv') as csvfile:
     reader = csv.reader(csvfile)
@@ -184,10 +224,11 @@ train_samples, validation_samples = train_test_split(lines, test_size=0.2)
 
 # X_train = np.array(images)
 # y_train = np.array(measurements)
-lenet(shape)
-nvidia(shape)
-kasper(shape)
-kasper2(shape)
+#lenet(shape)
+# nvidia(shape)
+nvidia2(shape)
+#kasper(shape)
+#kasper2(shape)
 
 
 # NVIDIA
@@ -219,6 +260,27 @@ kasper2(shape)
 # Epoch 3/3
 # 38572/38572 [==============================] - 37s - loss: 0.0093 - val_loss: 0.0070
 
+# kaspar modified
+# 503/503 [==============================] - 42s - loss: 0.3350 - val_loss: 0.1798
+# Epoch 2/10
+# 503/503 [==============================] - 36s - loss: 0.1218 - val_loss: 0.0841
+# Epoch 3/10
+# 503/503 [==============================] - 36s - loss: 0.0675 - val_loss: 0.0561
+# Epoch 4/10
+# 503/503 [==============================] - 37s - loss: 0.0503 - val_loss: 0.0468
+# Epoch 5/10
+# 503/503 [==============================] - 37s - loss: 0.0440 - val_loss: 0.0429
+# Epoch 6/10
+# 503/503 [==============================] - 36s - loss: 0.0411 - val_loss: 0.0409
+# Epoch 7/10
+# 503/503 [==============================] - 36s - loss: 0.0395 - val_loss: 0.0395
+# Epoch 8/10
+# 503/503 [==============================] - 36s - loss: 0.0386 - val_loss: 0.0386
+# Epoch 9/10
+# 503/503 [==============================] - 37s - loss: 0.0381 - val_loss: 0.0380
+# Epoch 10/10
+# 503/503 [==============================] - 36s - loss: 0.0377 - val_loss: 0.0378
+        
 # lenet
 # Epoch 1/10
 # 254/254 [==============================] - 17s - loss: 0.0343 - val_loss: 0.0246
