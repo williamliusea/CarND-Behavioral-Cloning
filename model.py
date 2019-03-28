@@ -146,8 +146,8 @@ def kasper(input_shape):
     model.fit_generator(train_generator, steps_per_epoch=math.ceil(len(train_samples)/batch_size), validation_data=validation_generator, validation_steps=math.ceil(len(validation_samples)/batch_size), epochs=5)
     model.save('model.kasper.h5')
 
-def kasper2(input_shape):
-    print("Kasper Sakmann model modified")
+def final_model(input_shape):
+    print("Final model")
     # compile and train the model using the generator function
     train_generator = generator(train_samples, batch_size=batch_size)
     validation_generator = generator(validation_samples, batch_size=batch_size)
@@ -228,7 +228,7 @@ lenet(shape)
 nvidia(shape)
 nvidia2(shape)
 kasper(shape)
-kasper2(shape)
+final_model(shape)
 
 
 # NVIDIA

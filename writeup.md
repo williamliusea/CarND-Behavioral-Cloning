@@ -12,18 +12,19 @@ My project includes the following files:
 * model.py containing the script to create and train the model
 * random_data.py containing the code to generate randomized data from the sample dataset.  
 * drive.py for driving the car in autonomous mode
-* model.kasper2.h5 containing a trained convolution neural network
+* model.final.h5 containing a trained convolution neural network
 * writeup.md summarizing the results
+* examples/success_track1.mp4 is the video for one autonomous lap. 
 
 #### 2. Submission includes functional code
 Using the Udacity provided simulator and my drive.py file, the car can be driven autonomously around the track by executing
 ```sh
-python drive.py model.kasper2.h5
+python drive.py model.final.h5
 ```
 
 #### 3. Submission code is usable and readable
 
-The model.py file contains the code for training and saving the convolution neural network. The file shows the pipeline I used for training and validating the model, and it contains comments to explain how the code works. The final model is generated using `kasper2()`
+The model.py file contains the code for training and saving the convolution neural network. The file shows the pipeline I used for training and validating the model, and it contains comments to explain how the code works. The final model is generated using `final_model()`
 
 ### Model Architecture and Training Strategy
 
@@ -34,12 +35,14 @@ My model consists of a convolution neural network with 3x3 filter sizes and dept
 The model includes RELU layers to introduce nonlinearity (code line 20), and the data is normalized in the model using a Keras lambda layer (code line 18).
 
 #### 2. Attempts to reduce overfitting in the model
-
-I tried to 
+I use loss vs val_loss as the metric for deciding whether the model over fits. In my final model, the loss and val_loss is almost the same. This indicates a not overfitting model.
+The following is the process I approach the problem.
+One of the attempts to reduce overfitting by using dropout. It dropped important nodes and make the model fail the test track.
+Another attempt is to reduce the training image size. This will reduce the redundant information to the model. Thus, I think will reduce over fitting.
 
 #### 3. Model parameter tuning
 
-The model used an adam optimizer, so the learning rate was not tuned manually (model.py line 25).
+I tuned the # of epochs in the training. 10 turns out to be a good number. I did not turn other parameters.
 
 #### 4. Appropriate training data
 I tried to record my own training data. I find that I am not a good driver. The same model training on my training data is terrible (like it cannot drive straight, drive in circle from the beginning etc). I find that there is a sample training dataset in the symbolic link under the CarND-Behavioral-Cloning-P3/data directory. The result is a much smoother auto driver.
