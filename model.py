@@ -25,6 +25,7 @@ def generator(samples, batch_size=32):
             for batch_sample in batch_samples:
                 name = batch_sample[0]
                 center_image = cv2.imread(name)
+                center_image = center_image[:,:,::-1]
                 if (center_image is not None):
                     center_angle = float(batch_sample[3])
                     images.append(center_image)
@@ -155,20 +156,21 @@ def final_model(input_shape):
     model.add(Lambda(lambda x: x/127.5 - 1.0, input_shape=input_shape))
     model.add(Conv2D(32, (8,8) ,padding='same', strides=(4,4),activation=activation))
     model.add(Conv2D(64, (8,8) ,padding='same',strides=(4,4),activation=activation))
-#     model.add(Dropout(0.5))
+    model.add(Dropout(0.5))
     model.add(Conv2D(128, (4,4),padding='same',strides=(4,4),activation=activation))
-    # model.add(Conv2D(128, (2,2),padding='same',strides=(1,1),activation=activation))
+    model.add(Conv2D(128, (2,2),padding='same',strides=(1,1),activation=activation))
     model.add(Flatten())
-#    model.add(Dropout(0.5))
+    model.add(Dropout(0.5))
     model.add(Dense(128,activation=activation))
+#    model.add(Dropout(0.5))
     model.add(Dense(128))
     model.add(Dense(1))
     model.summary()
     if summaryonly:
         return
     model.compile(loss='mse', optimizer='adam')
-    model.fit_generator(train_generator, steps_per_epoch=math.ceil(len(train_samples)/batch_size), validation_data=validation_generator, validation_steps=math.ceil(len(validation_samples)/batch_size), epochs=5)
-    model.save('model.kasper2.h5')
+    model.fit_generator(train_generator, steps_per_epoch=math.ceil(len(train_samples)/batch_size), validation_data=validation_generator, validation_steps=math.ceil(len(validation_samples)/batch_size), epochs=7)
+    model.save('model.final.h5')
 
 def lenet(input_shape):
     print("Lenet model")
@@ -202,7 +204,7 @@ parser.add_argument(
 )
 args = parser.parse_args()
 
-activation = 'elu'
+activation = 'relu'
 batch_size=320
 shape = (64, 64,3)
 lines =[]
@@ -224,10 +226,10 @@ train_samples, validation_samples = train_test_split(lines, test_size=0.2)
 
 # X_train = np.array(images)
 # y_train = np.array(measurements)
-lenet(shape)
-nvidia(shape)
-nvidia2(shape)
-kasper(shape)
+# lenet(shape)
+# nvidia(shape)
+# nvidia2(shape)
+# kasper(shape)
 final_model(shape)
 
 
@@ -303,4 +305,18 @@ final_model(shape)
 # Epoch 10/10
 # 254/254 [==============================] - 16s - loss: 0.0139 - val_loss: 0.0239
 
+# final model
+# 506/506 [==============================] - 54s - loss: 0.0347 - val_loss: 0.0249
+# Epoch 2/7
+# 506/506 [==============================] - 52s - loss: 0.0258 - val_loss: 0.0247
+# Epoch 3/7
+# 506/506 [==============================] - 54s - loss: 0.0237 - val_loss: 0.0230
+# Epoch 4/7
+# 506/506 [==============================] - 52s - loss: 0.0227 - val_loss: 0.0227
+# Epoch 5/7
+# 506/506 [==============================] - 53s - loss: 0.0219 - val_loss: 0.0219
+# Epoch 6/7
+# 506/506 [==============================] - 52s - loss: 0.0214 - val_loss: 0.0211
+# Epoch 7/7
+# 506/506 [==============================] - 51s - loss: 0.0208 - val_loss: 0.0209
 exit()

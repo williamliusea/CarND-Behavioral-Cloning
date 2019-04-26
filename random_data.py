@@ -162,4 +162,4 @@ def printProgressBar (iteration, total, prefix = '', suffix = '', decimals = 1, 
     # Print New Line on Complete
     if iteration >= total:
         print()
-generateData(200000, "/home/workspace/data")
+generateData(200000, "/opt/data")
