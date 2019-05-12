@@ -5,12 +5,14 @@ import numpy.random
 import sklearn
 import math
 import argparse
+import matplotlib.pyplot as plt
 
 from keras.models import Sequential
 from keras.layers import Flatten, Dense, Lambda, Cropping2D, Dropout
 from keras.layers.convolutional import Conv2D
 from keras.layers.pooling import MaxPooling2D
 from keras import regularizers
+from keras.utils.vis_utils import plot_model
 from sklearn.model_selection import train_test_split
 
 def generator(samples, batch_size=32):
@@ -147,31 +149,6 @@ def kasper(input_shape):
     model.fit_generator(train_generator, steps_per_epoch=math.ceil(len(train_samples)/batch_size), validation_data=validation_generator, validation_steps=math.ceil(len(validation_samples)/batch_size), epochs=5)
     model.save('model.kasper.h5')
 
-def final_model(input_shape):
-    print("Final model")
-    # compile and train the model using the generator function
-    train_generator = generator(train_samples, batch_size=batch_size)
-    validation_generator = generator(validation_samples, batch_size=batch_size)
-    model = Sequential()
-    model.add(Lambda(lambda x: x/127.5 - 1.0, input_shape=input_shape))
-    model.add(Conv2D(32, (8,8) ,padding='same', strides=(4,4),activation=activation))
-    model.add(Conv2D(64, (8,8) ,padding='same',strides=(4,4),activation=activation))
-    model.add(Dropout(0.5))
-    model.add(Conv2D(128, (4,4),padding='same',strides=(4,4),activation=activation))
-    model.add(Conv2D(128, (2,2),padding='same',strides=(1,1),activation=activation))
-    model.add(Flatten())
-    model.add(Dropout(0.5))
-    model.add(Dense(128,activation=activation))
-#    model.add(Dropout(0.5))
-    model.add(Dense(128))
-    model.add(Dense(1))
-    model.summary()
-    if summaryonly:
-        return
-    model.compile(loss='mse', optimizer='adam')
-    model.fit_generator(train_generator, steps_per_epoch=math.ceil(len(train_samples)/batch_size), validation_data=validation_generator, validation_steps=math.ceil(len(validation_samples)/batch_size), epochs=7)
-    model.save('model.final.h5')
-
 def lenet(input_shape):
     print("Lenet model")
     # compile and train the model using the generator function
@@ -196,6 +173,53 @@ def lenet(input_shape):
     model.fit_generator(train_generator, steps_per_epoch=math.ceil(len(train_samples)/batch_size), validation_data=validation_generator, validation_steps=math.ceil(len(validation_samples)/batch_size), epochs=10)
     model.save('model.lenet.h5')
 
+def final_model(input_shape):
+    print("Final model")
+    # compile and train the model using the generator function
+    train_generator = generator(train_samples, batch_size=batch_size)
+    validation_generator = generator(validation_samples, batch_size=batch_size)
+    model = Sequential()
+    model.add(Lambda(lambda x: x/127.5 - 1.0, input_shape=input_shape))
+    model.add(Conv2D(32, (8,8) ,padding='same', strides=(4,4),activation=activation))
+    model.add(Conv2D(64, (8,8) ,padding='same',strides=(4,4),activation=activation))
+    model.add(Dropout(0.5))
+    model.add(Conv2D(128, (4,4),padding='same',strides=(4,4),activation=activation))
+    model.add(Conv2D(128, (2,2),padding='same',strides=(1,1),activation=activation))
+    model.add(Flatten())
+    model.add(Dropout(0.5))
+    model.add(Dense(128,activation=activation))
+#    model.add(Dropout(0.5))
+    model.add(Dense(128))
+    model.add(Dense(1))
+    model.summary()
+    plot_model(model, to_file='final_model_plot.png', show_shapes=True, show_layer_names=True)
+    if summaryonly:
+        return
+    model.compile(loss='mse', optimizer='adam')
+    history = model.fit_generator(train_generator, steps_per_epoch=math.ceil(len(train_samples)/batch_size), validation_data=validation_generator, validation_steps=math.ceil(len(validation_samples)/batch_size), epochs=7)
+    printTraining(history)
+    model.save('model.final.h5')
+
+def printTraining(history):
+    # list all data in history
+    print(history.history.keys())
+    # summarize history for accuracy
+    plt.plot(history.history['acc'])
+    plt.plot(history.history['val_acc'])
+    plt.title('model accuracy')
+    plt.ylabel('accuracy')
+    plt.xlabel('epoch')
+    plt.legend(['train', 'test'], loc='upper left')
+    plt.savefig('final_model_accuracy.png')
+    # summarize history for loss
+    plt.plot(history.history['loss'])
+    plt.plot(history.history['val_loss'])
+    plt.title('model loss')
+    plt.ylabel('loss')
+    plt.xlabel('epoch')
+    plt.legend(['train', 'test'], loc='upper left')
+    plt.savefig('final_model_loss.png')
+    
 parser = argparse.ArgumentParser(description='Visulization')
 parser.add_argument(
     'input_path',
@@ -206,7 +230,7 @@ args = parser.parse_args()
 
 activation = 'relu'
 batch_size=320
-shape = (64, 64,3)
+shape = (320, 160,3)
 lines =[]
 summaryonly=False
 basedir = args.input_path
