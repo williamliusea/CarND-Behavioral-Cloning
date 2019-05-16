@@ -5,6 +5,7 @@ import numpy.random
 import sklearn
 import os
 import shutil
+import argparse
 
 def flip(image, steering):
     r = np.random.randint(0,2)
@@ -72,7 +73,7 @@ def getImage(line):
     else:
         steering = float(line[3]) - correction
     filename=src_path.split('/')[-1]
-    cur_path='sample_data/IMG/'+filename
+    cur_path= indir + '/IMG/'+filename
     image=cv2.imread(cur_path)
     image,steering = affineTransform(image,steering,shear_range=100)
     image,steering = crop(image,steering,tx_lower=-20,tx_upper=20,ty_lower=-10,ty_upper=10)
@@ -120,7 +121,7 @@ def generateData(target, outdir):
 
     count = 0
     lines =[]
-    with open('sample_data/driving_log.csv') as csvfile:
+    with open(indir + '/driving_log.csv') as csvfile:
         reader = csv.reader(csvfile)
         skip_first=False
         for line in reader:
@@ -137,8 +138,8 @@ def generateData(target, outdir):
             for line in lines_keep:
                 count=count+1
                 image,steering=getImage(line)
-                filename=outdir+"/IMG/"+str(count)+".jpg"
-                cv2.imwrite(filename,image)
+                filename='IMG/'+str(count)+".jpg"
+                cv2.imwrite(outdir+'/'+filename,image)
                 csvfile.writerow([filename, filename, filename, steering, 0, 0, 0])
             printProgressBar(count, target)
 
@@ -162,4 +163,14 @@ def printProgressBar (iteration, total, prefix = '', suffix = '', decimals = 1, 
     # Print New Line on Complete
     if iteration >= total:
         print()
+        
+
+parser = argparse.ArgumentParser(description='Visulization')
+parser.add_argument(
+    'input_path',
+    type=str,
+    help='Path data.'
+)
+args = parser.parse_args()
+indir = args.input_path
 generateData(200000, "/opt/data")

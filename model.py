@@ -26,9 +26,9 @@ def generator(samples, batch_size=32):
             angles = []
             for batch_sample in batch_samples:
                 name = batch_sample[0]
-                center_image = cv2.imread(name)
-                center_image = center_image[:,:,::-1]
+                center_image = cv2.imread(basedir+'/'+name)
                 if (center_image is not None):
+                    center_image = center_image[:,:,::-1]
                     center_angle = float(batch_sample[3])
                     images.append(center_image)
                     angles.append(center_angle)
@@ -180,15 +180,16 @@ def final_model(input_shape):
     validation_generator = generator(validation_samples, batch_size=batch_size)
     model = Sequential()
     model.add(Lambda(lambda x: x/127.5 - 1.0, input_shape=input_shape))
+#     model.add(MaxPooling2D(2,2))
     model.add(Conv2D(32, (8,8) ,padding='same', strides=(4,4),activation=activation))
+#     model.add(MaxPooling2D(2,2))
     model.add(Conv2D(64, (8,8) ,padding='same',strides=(4,4),activation=activation))
-    model.add(Dropout(0.5))
+#     model.add(MaxPooling2D(2,2))
     model.add(Conv2D(128, (4,4),padding='same',strides=(4,4),activation=activation))
-    model.add(Conv2D(128, (2,2),padding='same',strides=(1,1),activation=activation))
+    #model.add(Conv2D(128, (2,2),padding='same',strides=(1,1),activation=activation))
     model.add(Flatten())
     model.add(Dropout(0.5))
     model.add(Dense(128,activation=activation))
-#    model.add(Dropout(0.5))
     model.add(Dense(128))
     model.add(Dense(1))
     model.summary()
@@ -204,13 +205,13 @@ def printTraining(history):
     # list all data in history
     print(history.history.keys())
     # summarize history for accuracy
-    plt.plot(history.history['acc'])
-    plt.plot(history.history['val_acc'])
-    plt.title('model accuracy')
-    plt.ylabel('accuracy')
-    plt.xlabel('epoch')
-    plt.legend(['train', 'test'], loc='upper left')
-    plt.savefig('final_model_accuracy.png')
+#     plt.plot(history.history['acc'])
+#     plt.plot(history.history['val_acc'])
+#     plt.title('model accuracy')
+#     plt.ylabel('accuracy')
+#     plt.xlabel('epoch')
+#     plt.legend(['train', 'test'], loc='upper left')
+#     plt.savefig('final_model_accuracy.png')
     # summarize history for loss
     plt.plot(history.history['loss'])
     plt.plot(history.history['val_loss'])
@@ -230,8 +231,8 @@ args = parser.parse_args()
 
 activation = 'relu'
 batch_size=320
-shape = (320, 160,3)
 lines =[]
+shape = None
 summaryonly=False
 basedir = args.input_path
 with open(basedir+'/driving_log.csv') as csvfile:
@@ -240,6 +241,10 @@ with open(basedir+'/driving_log.csv') as csvfile:
     for line in reader:
         if (skip_first):
             lines.append(line)
+            if (shape is None):
+                image=cv2.imread(basedir+'/'+line[0])
+                print(basedir+'/'+line[0])
+                shape = image.shape
         else:
             skip_first=True
 

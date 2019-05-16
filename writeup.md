@@ -166,44 +166,22 @@ Non-trainable params: 0
 ```
 With this change, cut 1/4 of the parameters and the model is only **36MB**
 
-With this finding, I tried to make the Nvidia model similar structure but deeper. Here is the summary of the model.
-
-
-
+Now I am thinking back, do I really need to scale down the image to 64x64?
+The size of the original image is 320x160. I added maxpool layers to make sure the model size is comparable to the 64x64 case. 
+The model summary looks like this. 
+<img src="examples/320x160_model.png" width="400"/>
+The training history looks like this 
+<img src="examples/320x160_loss.png" width="400"/>
+And the model size is **46MB**
+When I run it on the simulator, the car runs out to the dirt at the open section. Looks like this model is not very good, although it is simpler
 
 ### 2. Final Model Architecture
 
-The final model architecture (model.py method kasper2()) consisted of a convolution neural network with the following layers and layer sizes
-
-
-Here is a visualization of the architecture (note: visualizing the architecture is optional according to the project rubric)
-
-```
-Kasper Sakmann model modified
-_________________________________________________________________
-Layer (type)                 Output Shape              Param #   
-=================================================================
-lambda_4 (Lambda)            (None, 64, 64, 3)         0         
-_________________________________________________________________
-conv2d_12 (Conv2D)           (None, 16, 16, 32)        6176      
-_________________________________________________________________
-conv2d_13 (Conv2D)           (None, 4, 4, 64)          131136    
-_________________________________________________________________
-conv2d_14 (Conv2D)           (None, 1, 1, 128)         131200    
-_________________________________________________________________
-flatten_4 (Flatten)          (None, 128)               0         
-_________________________________________________________________
-dense_11 (Dense)             (None, 128)               16512     
-_________________________________________________________________
-dense_12 (Dense)             (None, 128)               16512     
-_________________________________________________________________
-dense_13 (Dense)             (None, 1)                 129       
-=================================================================
-Total params: 301,665
-Trainable params: 301,665
-Non-trainable params: 0
-```
-
+The final model architecture (model.py method final_model()) consisted of a convolution neural network with the following layers and layer sizes
+<img src="examples/64x64_model.png" width="400"/>
+The model size is **36MB**
+Here is the training history
+<img src="examples/320x160_loss.png" width="400"/>
 
 ### 3. Creation of the Training Set & Training Process
 
